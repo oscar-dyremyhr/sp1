@@ -39,7 +39,7 @@ async function contrastViolations(page: Page) {
   return results.violations.flatMap((v) => v.nodes.map((n) => `${n.target.join(" ")} :: ${n.failureSummary?.split("\n")[1] ?? ""}`));
 }
 
-const publicPages = ["/", "/pricing", "/faq", "/sample-report", "/signup", "/styleguide"];
+const publicPages = ["/", "/pricing", "/faq", "/setup", "/sample-report", "/signup", "/styleguide"];
 const appPages = ["/app", "/app/controls", "/app/controls?control=dora-a9-02", "/app/reports/new", "/app/reports", "/app/billing", "/app/settings"];
 
 for (const theme of ["light", "dark"] as const) {

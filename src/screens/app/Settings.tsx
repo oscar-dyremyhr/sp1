@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Radar, RotateCcw, Trash2, UserPlus } from "lucide-react";
 import {
@@ -17,6 +18,7 @@ import {
   toast,
 } from "@/design-system/components";
 import { copy } from "@/content/copy";
+import { SERVICE_PRINCIPAL } from "@/content/setup";
 import { formatDateTime } from "@/lib/format";
 import { useQuery } from "@/lib/use-query";
 import { inviteTeammate, listTeam, listWorkspaces, removeTeammate, rescan, resetDemo } from "@/mocks/service";
@@ -160,6 +162,12 @@ export function Settings() {
         <h2 className="text-lg font-bold">{t.workspaces.title}</h2>
         <p className="mt-1 text-sm text-ink-muted">
           {t.workspaces.body} <Term k="workspace" /> · <Term k="catalog" />
+        </p>
+        <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+          <Badge tone="brand">{t.workspaces.signedInAs(SERVICE_PRINCIPAL)}</Badge>
+          <Link href="/setup" target="_blank" className="font-semibold text-brand underline-offset-4 hover:underline">
+            {t.workspaces.guide}
+          </Link>
         </p>
         <ul className="mt-4 space-y-3">
           {spaces.data.map((w) => (

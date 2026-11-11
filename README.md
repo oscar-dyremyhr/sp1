@@ -24,6 +24,7 @@ Open http://localhost:3000. Any email logs you in. The checkout only accepts the
 | Route | What it is |
 | --- | --- |
 | `/` | Landing page |
+| `/setup` | Engineer setup guide: service principal, least-privilege grants, what Receipts never gets |
 | `/pricing`, `/faq`, `/sample-report` | Pricing with monthly/annual toggle, FAQ, public read-only sample report |
 | `/signup`, `/login` | Mocked auth (any email works) |
 | `/app/welcome` | Onboarding wizard: company, regulations, connect workspace, first scan |
@@ -121,7 +122,7 @@ Every control has a **Show how we got this answer** button. It shows the rule, e
 
 Notes for whoever builds it:
 
-- Sign in as a **service principal with OAuth (machine to machine)** that has only `USE CATALOG` / `USE SCHEMA` / `SELECT` on the `system` catalog, plus read-only API scopes. That is what makes "read-only" true.
+- Sign in as a **service principal with OAuth (machine to machine)**. It needs `USE CATALOG` on `system`, `USE SCHEMA` + `SELECT` on the system schemas it reads, metadata-only `BROWSE` on the catalogs in scope, and "Can use" on one SQL warehouse. No `SELECT` on business data and no admin role. The full list, with copyable grants, is on `/setup` (content in `src/content/setup.ts`).
 - Queries run on a schedule (the "scan"), not when a page opens. Results are stored as evidence with the query text, a row sample and a timestamp, so a report is a frozen snapshot.
 - Checks read **logs, settings and check results**, never business rows. Where a control needs a fact about the data (for example the oldest record), it reads the result of a data-quality check instead.
 - Audit logs are regional, and account-level events use `workspace_id = 0`. Filter on `event_date` for speed. Statement text (`commandSubmit`) is only logged when **verbose audit logs** are on.

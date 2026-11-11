@@ -9,6 +9,8 @@ export type SessionState = {
   onboarded: boolean;
   regulations: RegulationId[];
   workspaceUrl: string;
+  /** Client ID of the read-only service principal (never the secret). */
+  workspaceClientId: string;
   workspaceConnected: boolean;
   lastScanAt: string | null;
   trialEndsAt: string | null;
@@ -22,6 +24,7 @@ export const initialSession: SessionState = {
   onboarded: false,
   regulations: ["dora", "bcbs239", "gdpr"],
   workspaceUrl: "",
+  workspaceClientId: "",
   workspaceConnected: false,
   lastScanAt: null,
   trialEndsAt: null,

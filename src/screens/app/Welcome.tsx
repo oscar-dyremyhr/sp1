@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight, Check, Copy, Loader2, Radar, UserPlus } from "lucide-react";
@@ -10,17 +11,18 @@ import {
   Card,
   ChoiceCard,
   Field,
+  GlossaryText,
   Input,
   Logo,
   ScoreGauge,
   Select,
   Stepper,
   Stubby,
-  Term,
   ThemeToggle,
   toast,
 } from "@/design-system/components";
 import { copy } from "@/content/copy";
+import { SERVICE_PRINCIPAL } from "@/content/setup";
 import {
   allRegulations,
   runScan,
@@ -44,6 +46,8 @@ export function Welcome() {
   const [country, setCountry] = useState(session.country);
   const [regs, setRegs] = useState<RegulationId[]>(session.regulations);
   const [url, setUrl] = useState(session.workspaceUrl);
+  const [clientId, setClientId] = useState(session.workspaceClientId);
+  const [clientSecret, setClientSecret] = useState("");
   const [checksDone, setChecksDone] = useState(-1);
   const [found, setFound] = useState<Workspace[] | null>(null);
   const [scan, setScan] = useState<{ checked: number; total: number } | null>(null);
@@ -80,7 +84,7 @@ export function Welcome() {
     run(async () => {
       setChecksDone(-1);
       setFound(null);
-      setFound(await testWorkspaceConnection(url, setChecksDone));
+      setFound(await testWorkspaceConnection({ url, clientId, clientSecret }, setChecksDone));
     });
 
   const firstScan = () =>
@@ -91,11 +95,17 @@ export function Welcome() {
 
   const copyInvite = async () => {
     try {
-      await navigator.clipboard.writeText(t.connect.inviteLink);
+      await navigator.clipboard.writeText(`${window.location.origin}/setup`);
     } catch {
-      /* clipboard blocked: the toast still tells the user what to do */
+      /* clipboard blocked: the guide can still be opened with the link next to it */
     }
     toast({ title: t.connect.inviteCopied, description: t.connect.inviteCopiedBody });
+  };
+
+  const useDemoDetails = () => {
+    setUrl(t.connect.demoUrl);
+    setClientId(t.connect.demoClientId);
+    setClientSecret(t.connect.demoSecret);
   };
 
   const firstName = (session.user?.name ?? "").split(" ")[0] || "there";
@@ -178,10 +188,10 @@ export function Welcome() {
                     {t.connect.title}
                   </h2>
                   <p className="mt-1 text-ink-muted">
-                    {t.connect.body} <Term k="workspace" /> · <Term k="databricks" />
+                    <GlossaryText text={t.connect.body} />
                   </p>
-                  <div className="mt-6 flex flex-wrap items-end gap-3">
-                    <Field label={t.connect.urlLabel} htmlFor="w-url" hint={t.connect.urlHint} className="min-w-64 flex-1">
+                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                    <Field label={t.connect.urlLabel} htmlFor="w-url" className="sm:col-span-2">
                       <Input
                         id="w-url"
                         value={url}
@@ -190,13 +200,35 @@ export function Welcome() {
                         inputMode="url"
                       />
                     </Field>
+                    <Field label={t.connect.clientIdLabel} htmlFor="w-client-id" hint={t.connect.clientIdHint}>
+                      <Input
+                        id="w-client-id"
+                        value={clientId}
+                        onChange={(e) => setClientId(e.target.value)}
+                        placeholder={t.connect.clientIdPlaceholder}
+                        className="font-mono"
+                        autoComplete="off"
+                      />
+                    </Field>
+                    <Field label={t.connect.secretLabel} htmlFor="w-client-secret" hint={t.connect.secretHint}>
+                      <Input
+                        id="w-client-secret"
+                        type="password"
+                        value={clientSecret}
+                        onChange={(e) => setClientSecret(e.target.value)}
+                        placeholder={t.connect.secretPlaceholder}
+                        className="font-mono"
+                        autoComplete="off"
+                      />
+                    </Field>
                   </div>
+                  <p className="mt-2 text-sm text-ink-muted">{t.connect.demoHint}</p>
                   <div className="mt-3 flex flex-wrap gap-3">
                     <Button variant="secondary" onClick={testConnection} loading={testing} disabled={found !== null}>
                       {testing ? t.connect.testing : t.connect.test}
                     </Button>
-                    {url ? null : (
-                      <Button variant="ghost" onClick={() => setUrl(t.connect.demoUrl)}>
+                    {url || found ? null : (
+                      <Button variant="ghost" onClick={useDemoDetails}>
                         {t.connect.useDemo}
                       </Button>
                     )}
@@ -221,7 +253,8 @@ export function Welcome() {
                   ) : null}
                   {found ? (
                     <p className="mt-4 rounded-2xl bg-pass-soft px-4 py-3 text-sm font-medium text-pass-ink" data-testid="connected">
-                      {t.connect.success(found.length, found.flatMap((w) => w.catalogs).length)}
+                      {t.connect.success(found.length, found.flatMap((w) => w.catalogs).length)}{" "}
+                      {t.connect.signedInAs(SERVICE_PRINCIPAL)}
                     </p>
                   ) : null}
 
@@ -233,9 +266,18 @@ export function Welcome() {
                         <p className="text-sm text-ink-muted">{t.connect.inviteBody}</p>
                       </div>
                     </div>
-                    <Button variant="secondary" size="sm" icon={<Copy aria-hidden />} onClick={copyInvite}>
-                      {t.connect.inviteCopy}
-                    </Button>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link
+                        href="/setup"
+                        target="_blank"
+                        className="rounded-full px-3 py-2 text-sm font-semibold text-brand underline-offset-4 hover:underline"
+                      >
+                        {t.connect.inviteOpen}
+                      </Link>
+                      <Button variant="secondary" size="sm" icon={<Copy aria-hidden />} onClick={copyInvite}>
+                        {t.connect.inviteCopy}
+                      </Button>
+                    </div>
                   </div>
                 </section>
               ) : null}

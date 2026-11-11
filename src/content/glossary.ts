@@ -103,6 +103,21 @@ export const glossary = {
     aliases: ["pull request", "pull requests"],
     definition: "A change to code that a second person must review and approve before it goes live.",
   },
+  servicePrincipal: {
+    term: "Service principal",
+    aliases: ["service principal", "service principals"],
+    definition: "A login made for software instead of a person. It can only do what it has been allowed to do.",
+  },
+  sqlWarehouse: {
+    term: "SQL warehouse",
+    aliases: ["SQL warehouse", "SQL warehouses"],
+    definition: "The engine in Databricks that runs questions written in SQL.",
+  },
+  auditLog: {
+    term: "Audit log",
+    aliases: ["audit log", "audit logs"],
+    definition: "A record Databricks keeps of who did what, and when.",
+  },
 } as const;
 
 export type GlossaryKey = keyof typeof glossary;

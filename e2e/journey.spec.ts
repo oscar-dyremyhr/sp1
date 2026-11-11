@@ -21,9 +21,14 @@ async function signUpAndOnboard(page: Page) {
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Which rules do you report on?" })).toBeVisible();
   await page.getByRole("button", { name: "Next", exact: true }).click();
-  await page.getByRole("button", { name: "Use the demo address" }).click();
+  // Connect: the read-only service principal's details (any details work in the demo)
+  await expect(page.getByLabel("Client ID")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open the setup guide" })).toHaveAttribute("href", "/setup");
+  await page.getByRole("button", { name: "Use the demo details" }).click();
   await page.getByRole("button", { name: "Test connection" }).click();
+  await expect(page.getByText("Confirming it cannot read or change your data")).toBeVisible();
   await expect(page.getByTestId("connected")).toContainText("2 workspaces and 14 catalogs");
+  await expect(page.getByTestId("connected")).toContainText("Signed in as receipts-readonly, read-only.");
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await page.getByRole("button", { name: "Run first scan" }).click();
   await expect(page.getByRole("heading", { name: "Scan finished" })).toBeVisible();
@@ -187,6 +192,14 @@ test("public pages work without an account, and /app sends visitors to log in", 
   await page.goto("/sample-report");
   await expect(page.getByText("This is a sample report with made-up data.")).toBeVisible();
   await expect(page.getByTestId("report-score")).toHaveText("72");
+
+  // The engineer setup guide: least-privilege grants, and what Receipts never gets
+  await page.goto("/setup");
+  const guide = page.getByTestId("setup-guide");
+  await expect(guide.getByRole("heading", { level: 1 })).toHaveText("Connect Receipts to Databricks");
+  await expect(guide.getByText("GRANT USE SCHEMA, SELECT ON SCHEMA system.access TO `receipts-readonly`;")).toBeVisible();
+  await expect(guide.getByText("GRANT BROWSE ON CATALOG risk")).toBeVisible();
+  await expect(guide.getByText("SELECT on your business tables")).toBeVisible();
 
   await page.goto("/faq");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();

@@ -157,15 +157,27 @@ export async function saveRegulations(ids: RegulationId[]): Promise<void> {
   useSession.setState({ regulations: regulations.map((r) => r.id).filter((id) => ids.includes(id)) });
 }
 
-/** Fake "testing connection": calls onStep as each check gets its tick. */
-export async function testWorkspaceConnection(url: string, onStep: (index: number) => void): Promise<Workspace[]> {
-  if (!url.trim()) throw new DemoError("invalid", copy.welcome.connect.urlMissing);
+/**
+ * Fake "testing connection": calls onStep as each check gets its tick.
+ * For real, this would exchange the client ID and secret for a one-hour OAuth
+ * token, run a trivial query on the SQL warehouse, and probe each grant.
+ * The secret is used for the test only and is never stored in the browser.
+ */
+export async function testWorkspaceConnection(
+  input: { url: string; clientId: string; clientSecret: string },
+  onStep: (index: number) => void,
+): Promise<Workspace[]> {
+  if (!input.url.trim()) throw new DemoError("invalid", copy.welcome.connect.urlMissing);
   const steps = copy.welcome.connect.checks.length;
   for (let i = 0; i < steps; i++) {
-    await wait(650 + Math.random() * 300);
+    await wait(550 + Math.random() * 300);
     onStep(i);
   }
-  useSession.setState({ workspaceUrl: url.trim(), workspaceConnected: true });
+  useSession.setState({
+    workspaceUrl: input.url.trim(),
+    workspaceClientId: input.clientId.trim(),
+    workspaceConnected: true,
+  });
   return workspaces;
 }
 

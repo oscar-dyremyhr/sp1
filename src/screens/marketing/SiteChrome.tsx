@@ -59,7 +59,7 @@ export function SiteFooter() {
           <p className="mt-3 text-xs text-ink-muted">{t.footer.demoNote}</p>
         </div>
         <nav aria-label={copy.brand.name} className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-          {[...links, { href: "/styleguide", label: t.footer.styleguide }, { href: "/login", label: t.nav.logIn }].map((l) => (
+          {[...links, { href: "/setup", label: t.nav.setup }, { href: "/styleguide", label: t.footer.styleguide }, { href: "/login", label: t.nav.logIn }].map((l) => (
             <Link key={l.href} href={l.href} className="text-ink-muted underline-offset-4 hover:text-ink hover:underline">
               {l.label}
             </Link>
