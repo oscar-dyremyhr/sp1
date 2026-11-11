@@ -2,83 +2,84 @@
 
 > **Side project 1** — working title. The repo will be renamed once the project has a proper name.
 
-A website built with **TypeScript**, **React** and **Vue**, powered by [Vite](https://vite.dev).
+A website built with **Next.js**, **TypeScript**, **Tailwind CSS** and **shadcn/ui**, hosted on **Vercel**.
 
 ## Tech stack
 
 | Tool | Purpose |
 | --- | --- |
-| [TypeScript](https://www.typescriptlang.org/) | Type-safe JavaScript |
-| [React](https://react.dev/) | UI library (`apps/react`) |
-| [Vue 3](https://vuejs.org/) | UI framework (`apps/vue`) |
-| [Vite](https://vite.dev/) | Dev server & bundler |
-| npm workspaces | Monorepo management |
+| [Next.js](https://nextjs.org/docs) (App Router) | React framework: routing, server components, builds |
+| [TypeScript](https://www.typescriptlang.org/) | Type safety |
+| [Tailwind CSS v4](https://tailwindcss.com/docs) | Utility-first styling (configured in `src/app/globals.css`) |
+| [shadcn/ui](https://ui.shadcn.com/docs) | Accessible components copied into `src/components/ui` |
+| [ESLint](https://eslint.org/) | Linting (`eslint-config-next`) |
+| [Vercel](https://vercel.com/docs) | Hosting & preview deployments |
 
 ## Project structure
 
 ```
 sp1/
-├── apps/
-│   ├── react/        # React + TypeScript app (Vite)
-│   └── vue/          # Vue 3 + TypeScript app (Vite)
-├── .github/
-│   └── workflows/    # CI (lint + build)
-├── package.json      # Root workspace config & scripts
-└── README.md
+├── public/                 # Static files served from /
+├── src/
+│   ├── app/                # App Router: routes, layouts, globals.css
+│   │   ├── layout.tsx      # Root layout (fonts, metadata)
+│   │   └── page.tsx        # Home page (/)
+│   ├── components/
+│   │   └── ui/             # shadcn/ui components (yours to edit)
+│   └── lib/
+│       └── utils.ts        # cn() class-name helper
+├── components.json         # shadcn/ui config
+├── next.config.ts
+└── .github/workflows/      # CI: lint, type-check, build
 ```
 
 ## Getting started
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) 20.19+ (22 recommended — see `.nvmrc`)
+- [Node.js](https://nodejs.org/) 20.9+ (22 recommended — see `.nvmrc`)
 - npm 10+
 
-### Install
+### Install & run
 
 ```bash
 npm install
-```
-
-### Develop
-
-```bash
-npm run dev:react   # http://localhost:5173
-npm run dev:vue     # http://localhost:5174
-npm run dev         # both at once
-```
-
-### Build
-
-```bash
-npm run build       # builds every app into apps/*/dist
-```
-
-### Lint
-
-```bash
-npm run lint
+npm run dev         # http://localhost:3000
 ```
 
 ## Scripts
 
 | Script | Description |
 | --- | --- |
-| `npm run dev` | Start all apps in dev mode |
-| `npm run dev:react` | Start the React app |
-| `npm run dev:vue` | Start the Vue app |
-| `npm run build` | Type-check and build all apps |
-| `npm run build:react` | Build the React app |
-| `npm run build:vue` | Build the Vue app |
-| `npm run lint` | Lint all apps that define a lint script |
+| `npm run dev` | Start the dev server |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | Lint with ESLint |
+| `npm run type-check` | Type-check with `tsc` |
+
+## Adding shadcn/ui components
+
+```bash
+npx shadcn@latest add dialog input dropdown-menu
+```
+
+Components land in `src/components/ui/` and can be edited freely. Browse them at [ui.shadcn.com/docs/components](https://ui.shadcn.com/docs/components).
+
+> Tip: to style a link like a button, use `cn(buttonVariants({ variant: "outline" }))` so conflicting Tailwind classes are merged correctly.
+
+## Deploying to Vercel
+
+1. Go to [vercel.com/new](https://vercel.com/new) and import `oscar-dyremyhr/sp1`.
+2. Keep the detected defaults (framework: Next.js) and click **Deploy**.
+
+Every push to `main` deploys to production, and every pull request gets a preview URL. Renaming the GitHub repo later is fine — Vercel follows the rename.
 
 ## Roadmap
 
 - [ ] Decide on a project name and rename the repo
-- [ ] Decide how React and Vue fit together (separate pages, micro-frontends, or pick one)
-- [ ] Add shared packages (UI components, utilities) under `packages/`
-- [ ] Add testing (Vitest)
-- [ ] Set up deployment
+- [ ] Connect the repo to Vercel
+- [ ] Add a dark-mode toggle (e.g. `next-themes`)
+- [ ] Replace the starter page with real content
 
 ## License
 
