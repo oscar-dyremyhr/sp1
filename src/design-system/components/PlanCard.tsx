@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 export function PlanCard({
   name,
   price,
+  pricePrefix,
   period,
   note,
   bestFor,
@@ -16,6 +17,7 @@ export function PlanCard({
 }: {
   name: string;
   price: string;
+  pricePrefix?: string;
   period?: string;
   note?: string;
   bestFor: string;
@@ -42,6 +44,7 @@ export function PlanCard({
       <h3 className="text-lg font-bold">{name}</h3>
       <p className="mt-1 min-h-10 text-sm text-ink-muted">{bestFor}</p>
       <p className="mt-4 flex flex-wrap items-baseline gap-x-1.5">
+        {pricePrefix ? <span className="text-sm text-ink-muted">{pricePrefix}</span> : null}
         <span className="tabular font-mono text-3xl font-bold" data-testid="plan-price">
           {price}
         </span>

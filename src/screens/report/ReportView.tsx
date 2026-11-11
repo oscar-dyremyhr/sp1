@@ -24,7 +24,8 @@ export function ReportView({ report: initial, mode }: { report: Report; mode: Re
   const [report, setReport] = useState(initial);
   const [refreshing, setRefreshing] = useState(false);
   const [celebrate] = useState(() => mode === "app" && useReports.getState().celebrateId === initial.id);
-  const [now] = useState(() => Date.now());
+  // Only the app view needs the clock (for the free 24-hour refresh).
+  const [now] = useState(() => (mode === "app" ? Date.now() : 0));
 
   useEffect(() => {
     if (celebrate) markCelebrated();

@@ -2,6 +2,7 @@
 
 import { Accordion as A } from "radix-ui";
 import { ChevronDown } from "lucide-react";
+import { GlossaryText } from "./Term";
 
 export function Accordion({ items }: { items: { q: string; a: string }[] }) {
   return (
@@ -18,7 +19,9 @@ export function Accordion({ items }: { items: { q: string; a: string }[] }) {
             </A.Trigger>
           </A.Header>
           <A.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-            <p className="max-w-prose px-5 pb-5 text-ink-muted">{item.a}</p>
+            <p className="max-w-prose px-5 pb-5 text-ink-muted">
+              <GlossaryText text={item.a} />
+            </p>
           </A.Content>
         </A.Item>
       ))}
