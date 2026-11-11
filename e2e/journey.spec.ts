@@ -9,6 +9,9 @@ import { expect, test, type Page } from "@playwright/test";
 async function signUpAndOnboard(page: Page) {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Show the auditor your receipts.");
+  for (const platform of ["Databricks", "Snowflake", "Microsoft Fabric"]) {
+    await expect(page.getByTestId("supports").getByText(platform, { exact: true })).toBeVisible();
+  }
   await page.getByTestId("hero-cta").click();
 
   await page.getByLabel("Your name").fill("Ingrid Solberg");

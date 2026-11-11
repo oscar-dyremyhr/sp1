@@ -638,6 +638,15 @@ export const copy = {
       body: "Receipts turns your Databricks lakehouse into an auditor-ready evidence report in minutes. Nobody has to rebuild the proof by hand in spreadsheets again.",
       secondary: "See a sample report",
       note: "1 free report. No card needed.",
+      supports: {
+        label: "Supports",
+        soon: "Soon",
+        platforms: [
+          { id: "databricks", name: "Databricks", soon: false },
+          { id: "snowflake", name: "Snowflake", soon: true },
+          { id: "fabric", name: "Microsoft Fabric", soon: true },
+        ] satisfies { id: "databricks" | "snowflake" | "fabric"; name: string; soon: boolean }[],
+      },
       reportTitle: "Audit evidence report",
       reportOrg: "Nordlys Bank · DORA",
       reportLines: [

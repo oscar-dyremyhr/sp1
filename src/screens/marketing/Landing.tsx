@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Eye, KeyRound, Plug, ScanSearch, Send, ShieldCheck, X } from "lucide-react";
+import { ArrowRight, Blocks, Check, Eye, KeyRound, Layers, Plug, ScanSearch, Send, ShieldCheck, Snowflake, X } from "lucide-react";
 import { Badge, ButtonLink, Card, StatusPill, Stubby } from "@/design-system/components";
 import { copy } from "@/content/copy";
 import { countStatuses, readinessScore } from "@/lib/scoring";
@@ -8,6 +8,7 @@ import { HeroReceipt } from "./HeroReceipt";
 
 const t = copy.marketing;
 const stepIcons = [Plug, ScanSearch, Send];
+const platformIcons = { databricks: Layers, snowflake: Snowflake, fabric: Blocks };
 const securityIcons = [Eye, ShieldCheck, KeyRound];
 const regTone = { dora: "brand", bcbs239: "mint", gdpr: "sun" } as const;
 const regTilt = ["-rotate-2", "rotate-1", "-rotate-1"];
@@ -47,6 +48,24 @@ export function Landing() {
             </ButtonLink>
           </div>
           <p className="mt-4 text-sm text-ink-muted">{t.hero.note}</p>
+          <div className="mt-8 border-t border-line pt-5" data-testid="supports">
+            <p className="text-xs font-semibold tracking-wide text-ink-muted uppercase">{t.hero.supports.label}</p>
+            <ul className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-3">
+              {t.hero.supports.platforms.map((p) => {
+                const Icon = platformIcons[p.id];
+                return (
+                  <li key={p.id} className="flex items-center gap-2">
+                    {/* Placeholder mark. Swap for the vendor's official logo file when you have it. */}
+                    <span className="flex size-8 items-center justify-center rounded-lg border border-line bg-surface text-ink">
+                      <Icon className="size-4.5" aria-hidden />
+                    </span>
+                    <span className="font-heading font-bold whitespace-nowrap">{p.name}</span>
+                    {p.soon ? <Badge>{t.hero.supports.soon}</Badge> : null}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </div>
         <HeroReceipt />
       </section>
