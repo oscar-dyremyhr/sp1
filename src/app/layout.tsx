@@ -1,29 +1,41 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { copy } from "@/content/copy";
+import { Providers } from "@/design-system/components/Providers";
 
-const geistSans = Geist({
-  variable: "--font-sans",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
 });
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
+const jetbrains = JetBrains_Mono({
+  variable: "--font-jetbrains",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "sp1",
-  description: "Side project 1 — built with Next.js, Tailwind CSS and shadcn/ui.",
+  title: { default: copy.meta.title, template: `%s · ${copy.brand.name}` },
+  description: copy.meta.description,
 };
+
+// Runs before first paint so the saved (or system) theme never flashes.
+const themeScript = `(function(){try{var t=localStorage.getItem("receipts-theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.setAttribute("data-theme",t)}catch(e){}})()`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      data-theme="light"
+      suppressHydrationWarning
+      className={`${bricolage.variable} ${inter.variable} ${jetbrains.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body className="flex min-h-full flex-col">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
