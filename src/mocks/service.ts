@@ -10,17 +10,22 @@ import { copy } from "@/content/copy";
 import { type Billing, type PackId, getPlan, planPrice, pricing } from "@/content/pricing";
 import { isTestCard } from "@/lib/card";
 import { shortId } from "@/lib/format";
+import { renderQuery, suggestDataMap } from "@/lib/datamap";
 import { buildSnapshot, isFreeRegenerate } from "@/lib/report";
 import { countStatuses, readinessScore } from "@/lib/scoring";
 import { initialCredits, useCredits } from "@/store/credits";
+import { useDataMap } from "@/store/datamap";
 import { initialReports, useReports } from "@/store/reports";
 import { initialSession, useSession } from "@/store/session";
 import { controls as controlFixtures, evidence as evidenceFixtures } from "./fixtures/controls";
 import { demoOrg, fixOrder, regulations, scoreHistory, workspaces } from "./fixtures/org";
+import { discoveredTags, structure } from "./fixtures/structure";
 import type {
   Audience,
   Control,
   ControlFilter,
+  DataMap,
+  DiscoveredTag,
   Evidence,
   Invoice,
   Organization,
@@ -31,6 +36,7 @@ import type {
   StatusCounts,
   User,
   Workspace,
+  WorkspaceStructure,
 } from "./types";
 
 // ---------- plumbing ----------
@@ -132,6 +138,7 @@ export async function signUp(input: { name: string; email: string; company: stri
   });
   useCredits.setState(initialCredits);
   useReports.setState(initialReports);
+  useDataMap.setState({ map: null });
   return user;
 }
 
@@ -269,7 +276,12 @@ export async function getControl(id: string): Promise<{ control: Control; eviden
   await delay();
   const control = currentControls().find((c) => c.id === id);
   if (!control) throw new DemoError("not_found", copy.controls.notFound);
-  return { control, evidence: evidenceFixtures.filter((e) => control.evidenceIds.includes(e.id)) };
+  // Each check's query is filled in from the organisation's data map (tag names, where things live).
+  const map = currentDataMap();
+  const evidence = evidenceFixtures
+    .filter((e) => control.evidenceIds.includes(e.id))
+    .map((e) => ({ ...e, method: { ...e.method, ...renderQuery(e.method.query, map) } }));
+  return { control, evidence };
 }
 
 export async function listWorkspaces(): Promise<Workspace[]> {
@@ -277,6 +289,32 @@ export async function listWorkspaces(): Promise<Workspace[]> {
   const s = useSession.getState();
   if (!s.workspaceConnected) return [];
   return workspaces.map((w) => ({ ...w, lastScanAt: s.lastScanAt ?? w.lastScanAt }));
+}
+
+// ---------- data map ----------
+
+function currentDataMap(): DataMap {
+  return useDataMap.getState().map ?? suggestDataMap(structure, discoveredTags);
+}
+
+export type DataMapInfo = { map: DataMap; structure: WorkspaceStructure; tags: DiscoveredTag[] };
+
+/**
+ * The organisation's catalogs, schemas and tables (for real: read from
+ * system.information_schema), the tags in use, and the saved data map, or a
+ * first guess when nothing has been saved yet.
+ */
+export async function getDataMap(): Promise<DataMapInfo> {
+  await delay();
+  return { map: currentDataMap(), structure, tags: discoveredTags };
+}
+
+/** Saved maps are remembered and used by every later scan. */
+export async function saveDataMap(map: DataMap): Promise<DataMap> {
+  await delay();
+  const saved = { ...map, confirmedAt: new Date().toISOString() };
+  useDataMap.setState({ map: saved });
+  return saved;
 }
 
 // ---------- reports ----------
@@ -470,4 +508,5 @@ export async function resetDemo(): Promise<void> {
   });
   useCredits.setState(initialCredits);
   useReports.setState(initialReports);
+  useDataMap.setState({ map: null });
 }

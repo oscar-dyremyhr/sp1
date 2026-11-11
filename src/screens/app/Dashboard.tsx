@@ -18,6 +18,7 @@ import { formatDate, formatDateTime } from "@/lib/format";
 import { useQuery } from "@/lib/use-query";
 import { getDashboard } from "@/mocks/service";
 import type { ControlStatus } from "@/mocks/types";
+import { useDataMap } from "@/store/datamap";
 import { ErrorState } from "./ErrorState";
 
 const t = copy.dashboard;
@@ -37,12 +38,25 @@ function StatusWord({ status }: { status: ControlStatus }) {
 
 export function Dashboard() {
   const { data, error, reload } = useQuery("dashboard", getDashboard);
+  const mapConfirmed = useDataMap((s) => s.map !== null);
   if (error) return <ErrorState onRetry={reload} />;
   if (!data) return <PageLoading label={t.loading} />;
 
   return (
     <div className="space-y-6" data-testid="dashboard">
       <p className="text-ink-muted">{t.subtitle(data.org.name)}</p>
+
+      {mapConfirmed ? null : (
+        <div className="flex flex-wrap items-center gap-4 rounded-card bg-sun px-6 py-4 text-on-accent" data-testid="map-banner">
+          <div className="min-w-0 flex-1">
+            <p className="font-heading text-lg font-bold">{copy.dataMap.banner.title}</p>
+            <p className="text-sm">{copy.dataMap.banner.body}</p>
+          </div>
+          <ButtonLink href="/app/data-map" variant="secondary" size="sm">
+            {copy.dataMap.banner.cta}
+          </ButtonLink>
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-2">

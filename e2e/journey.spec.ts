@@ -236,3 +236,58 @@ test("reduced motion turns off the big animations", async ({ page }) => {
   await expect(page.getByTestId("first-report-banner")).toBeVisible();
   await expect(page.getByTestId("confetti")).toHaveCount(0);
 });
+
+test("the data map mirrors the workspace, takes whole schemas or single tables, and feeds the checks", async ({ page }) => {
+  await signUpAndOnboard(page);
+
+  // The dashboard nudges towards the first guess
+  await page.getByTestId("map-banner").getByRole("link", { name: "Check data map" }).click();
+  const map = page.getByTestId("data-map");
+  await expect(map).toBeVisible();
+  await expect(page.getByTestId("map-guess")).toBeVisible();
+  await expect(map.getByText("14 catalogs, 28 schemas and 68 tables read from your workspace.")).toBeVisible();
+
+  // Board reports: the guess is the risk.board schema (4 tables)
+  await map.locator('[data-role="board"]').click();
+  await expect(page.getByTestId("covered-board")).toHaveText("4 tables covered");
+  await expect(map.getByRole("checkbox", { name: "risk.board", exact: true })).toBeChecked();
+
+  // A recommendation spots a stray board table; one click adds it
+  const rec = map.locator('[data-rec="board-finance.reporting.agg_board_kpi_pack"]');
+  await expect(rec).toContainText("finance.reporting.agg_board_kpi_pack");
+  await rec.getByRole("button", { name: "Add it" }).click();
+  await expect(page.getByTestId("covered-board")).toHaveText("5 tables covered");
+  await expect(rec).toHaveCount(0);
+
+  // Pick a whole schema, then drop one table from it
+  await map.getByRole("searchbox").fill("dashboards");
+  await map.getByRole("checkbox", { name: "reporting.dashboards", exact: true }).check();
+  await expect(page.getByTestId("covered-board")).toHaveText("7 tables covered");
+  await map.getByRole("checkbox", { name: "reporting.dashboards.agg_branch_scorecard" }).uncheck();
+  await expect(page.getByTestId("covered-board")).toHaveText("6 tables covered");
+  await map.getByRole("searchbox").fill("");
+
+  // This organisation calls its personal-data tag something else
+  await map.locator("#tag-pii").fill("personal_data");
+  await expect(page.getByTestId("map-status")).toHaveText("You have changes that are not saved yet.");
+  await page.getByTestId("save-map").click();
+  await expect(page.getByTestId("toast").filter({ hasText: "Data map saved" })).toBeVisible();
+  await expect(page.getByTestId("map-guess")).toHaveCount(0);
+
+  // Remembered after a reload
+  await page.reload();
+  await expect(page.locator("#tag-pii")).toHaveValue("personal_data");
+  await page.locator('[data-role="board"]').click();
+  await expect(page.getByTestId("covered-board")).toHaveText("6 tables covered");
+
+  // …and the checks now use it
+  await page.goto("/app/controls?control=gdpr-a30-01");
+  await page.getByTestId("show-logic").click();
+  const logic = page.getByTestId("control-logic");
+  await expect(logic.getByText("WHERE tag_name = 'personal_data'").first()).toBeVisible();
+  await expect(logic.getByTestId("uses-map").first()).toBeVisible();
+
+  await page.goto("/app");
+  await expect(page.getByTestId("dashboard")).toBeVisible();
+  await expect(page.getByTestId("map-banner")).toHaveCount(0);
+});

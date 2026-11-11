@@ -40,7 +40,7 @@ async function contrastViolations(page: Page) {
 }
 
 const publicPages = ["/", "/pricing", "/faq", "/setup", "/sample-report", "/signup", "/styleguide"];
-const appPages = ["/app", "/app/controls", "/app/controls?control=dora-a9-02", "/app/reports/new", "/app/reports", "/app/billing", "/app/settings"];
+const appPages = ["/app", "/app/controls", "/app/controls?control=dora-a9-02", "/app/data-map", "/app/reports/new", "/app/reports", "/app/billing", "/app/settings"];
 
 for (const theme of ["light", "dark"] as const) {
   test(`text contrast passes WCAG AA in the ${theme} theme`, async ({ page }) => {

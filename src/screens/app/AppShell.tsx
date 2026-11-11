@@ -4,7 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { DropdownMenu } from "radix-ui";
-import { CreditCard, FileText, LayoutDashboard, ListChecks, LogOut, Settings, Sparkles } from "lucide-react";
+import { CreditCard, FileText, FolderTree, LayoutDashboard, ListChecks, LogOut, Settings, Sparkles } from "lucide-react";
 import { Button, CreditCounter, Logo, LogoMark, ThemeToggle } from "@/design-system/components";
 import { copy } from "@/content/copy";
 import { logOut } from "@/mocks/service";
@@ -17,6 +17,7 @@ import { openPaywall, PaywallHost } from "./Paywall";
 const nav = [
   { href: "/app", label: copy.nav.dashboard, icon: LayoutDashboard, exact: true },
   { href: "/app/controls", label: copy.nav.controls, icon: ListChecks },
+  { href: "/app/data-map", label: copy.nav.dataMap, icon: FolderTree },
   { href: "/app/reports", label: copy.nav.reports, icon: FileText },
   { href: "/app/billing", label: copy.nav.billing, icon: CreditCard },
   { href: "/app/settings", label: copy.nav.settings, icon: Settings },
@@ -24,6 +25,7 @@ const nav = [
 
 const titles: [prefix: string, title: string][] = [
   ["/app/controls", copy.controls.title],
+  ["/app/data-map", copy.dataMap.title],
   ["/app/reports/new", copy.wizard.title],
   ["/app/reports", copy.reports.title],
   ["/app/billing", copy.billing.title],

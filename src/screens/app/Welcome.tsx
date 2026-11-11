@@ -345,6 +345,11 @@ export function Welcome() {
               </Button>
             ) : null}
             {step === 3 && score !== null ? (
+              <Button variant="secondary" onClick={() => router.push("/app/data-map")}>
+                {copy.dataMap.afterScan}
+              </Button>
+            ) : null}
+            {step === 3 && score !== null ? (
               <Button onClick={() => router.push("/app")}>
                 {t.scan.toDashboard}
                 <ArrowRight aria-hidden />

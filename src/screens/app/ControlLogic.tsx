@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Database, GitBranch, Lightbulb, Plug, ShieldCheck } from "lucide-react";
 import { Badge, CodeBlock, Modal, StatusPill } from "@/design-system/components";
 import { copy } from "@/content/copy";
@@ -108,6 +109,15 @@ export function ControlLogic({
                     copyLabel={t.copyQuery}
                     copiedMessage={t.copied}
                   />
+
+                  {e.method.usesMap ? (
+                    <p className="mt-2 text-xs text-ink-muted" data-testid="uses-map">
+                      {copy.dataMap.logicNote}{" "}
+                      <Link href="/app/data-map" className="font-semibold text-brand underline-offset-4 hover:underline">
+                        {copy.dataMap.logicLink}
+                      </Link>
+                    </p>
+                  ) : null}
 
                   <h4 className="mt-4 mb-1.5 text-xs font-bold tracking-wide text-ink-muted uppercase">{t.cameBack}</h4>
                   <Rows method={e.method} />

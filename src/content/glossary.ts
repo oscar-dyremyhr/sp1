@@ -118,6 +118,16 @@ export const glossary = {
     aliases: ["audit log", "audit logs"],
     definition: "A record Databricks keeps of who did what, and when.",
   },
+  schema: {
+    term: "Schema",
+    aliases: ["schema", "schemas"],
+    definition: "A folder inside a catalog that groups related tables.",
+  },
+  tag: {
+    term: "Tag",
+    aliases: ["tag", "tags"],
+    definition: "A label stuck on data, such as “owner” or “personal data”, so people and tools can find it.",
+  },
 } as const;
 
 export type GlossaryKey = keyof typeof glossary;

@@ -30,6 +30,7 @@ Open http://localhost:3000. Any email logs you in. The checkout only accepts the
 | `/app/welcome` | Onboarding wizard: company, regulations, connect workspace, first scan |
 | `/app` | Dashboard: readiness score, status counts, top 3 things to fix, credits |
 | `/app/controls` | Controls explorer with detail drawer, evidence and fix steps |
+| `/app/data-map` | Data map: where risk, board, personal and test data live (whole catalogs, schemas or single tables), which tags the organisation uses, its own rules, and recommendations |
 | `/app/reports/new` | Report wizard, then the receipt-printing animation |
 | `/app/reports/:id` | Report viewer: Download PDF, copy share link, free 24-hour refresh |
 | `/app/reports` | Report history: open, duplicate, compare |
@@ -126,7 +127,7 @@ Notes for whoever builds it:
 - Queries run on a schedule (the "scan"), not when a page opens. Results are stored as evidence with the query text, a row sample and a timestamp, so a report is a frozen snapshot.
 - Checks read **logs, settings and check results**, never business rows. Where a control needs a fact about the data (for example the oldest record), it reads the result of a data-quality check instead.
 - Audit logs are regional, and account-level events use `workspace_id = 0`. Filter on `event_date` for speed. Statement text (`commandSubmit`) is only logged when **verbose audit logs** are on.
-- Tag names (`owner`, `pii`, `retention_days`…) and thresholds are customer-specific, so they belong in per-customer settings.
+- Tag names (`owner`, `pii`, `retention_days`…), where each kind of data lives, and thresholds differ per customer. They are kept in the **Data map** (`/app/data-map`, logic in `src/lib/datamap.ts`). Check queries carry placeholders such as `{{tag.pii}}` and `{{scope:board:column}}` that are filled in from the saved map, so every re-scan uses it. A catalog or schema in the map covers tables added later.
 
 ## Deploying to Vercel
 

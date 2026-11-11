@@ -3,7 +3,7 @@
  * can be added later by swapping the object. UI copy is written for a
  * 12-year-old reading level; only the report itself is formal.
  */
-import type { Audience, ControlStatus, EvidenceType, RegulationId, Role } from "@/mocks/types";
+import type { Audience, ControlStatus, DataRole, EvidenceType, Policies, RegulationId, Role, TagKey } from "@/mocks/types";
 
 const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 
@@ -90,6 +90,7 @@ export const copy = {
     main: "Main",
     dashboard: "Dashboard",
     controls: "Controls",
+    dataMap: "Data map",
     reports: "Reports",
     billing: "Billing",
     settings: "Settings",
@@ -526,6 +527,103 @@ export const copy = {
     goodToKnow: "Good to know",
     copyQuery: "Copy",
     copied: "Query copied",
+  },
+  dataMap: {
+    title: "Data map",
+    loading: "Reading your workspace",
+    subtitle:
+      "Every company organises its data differently. Tell Receipts how yours is set up, so each check looks in the right place. Receipts remembers this for every scan.",
+    guessTitle: "This is our first guess",
+    guessBody: "We read your catalog names and tags and filled this in for you. Check it, change what is wrong, then save.",
+    savedAt: (date: string) => `Saved ${date}. Every scan uses this map.`,
+    unsaved: "You have changes that are not saved yet.",
+    save: "Save data map",
+    saved: "Data map saved",
+    savedBody: "Your next scan will use it.",
+    structureNote: (catalogs: number, schemas: number, tables: number) =>
+      `${catalogs} catalogs, ${schemas} schemas and ${tables} tables read from your workspace.`,
+    rolesTitle: "Where things live",
+    rolesBody:
+      "Pick a kind of data, then tick where it lives. Tick a whole catalog or schema to cover everything in it, including tables added later.",
+    rolesAria: "Kind of data",
+    roles: {
+      risk: { name: "Risk reporting data", description: "The tables behind the risk numbers you report to regulators.", checks: 6 },
+      board: { name: "Board reports", description: "Tables that feed reports to the board and senior managers.", checks: 1 },
+      personal: { name: "Personal data", description: "Where customer and employee details are kept.", checks: 6 },
+      test: { name: "Test and sandbox data", description: "Places for experiments. Real customer details should never be here.", checks: 1 },
+    } satisfies Record<DataRole, { name: string; description: string; checks: number }>,
+    usedBy: (n: number) => `Used by ${n} ${plural(n, "check", "checks")}`,
+    covered: (tables: number) => (tables === 0 ? "Nothing picked yet" : `${tables} ${plural(tables, "table", "tables")} covered`),
+    treeAria: (role: string) => `Where ${role.toLowerCase()} lives`,
+    search: "Search catalogs, schemas and tables",
+    searchEmpty: "Nothing matches that search.",
+    toggle: (name: string) => `Show what is inside ${name}`,
+    tablesIn: (n: number) => `${n} ${plural(n, "table", "tables")}`,
+    schemasIn: (n: number) => `${n} ${plural(n, "schema", "schemas")}`,
+    tagsTitle: "Your tags",
+    tagsBody: "A tag is a label on your data. Tell us which label you use for each meaning.",
+    tags: {
+      pii: { name: "Personal data", description: "Marks columns that hold personal details." },
+      criticality: { name: "Critical data", description: "Marks your most important tables." },
+      owner: { name: "Owner", description: "Names the person or team who answers for a table." },
+      retention: { name: "Retention", description: "Says how many days the data is kept." },
+      businessService: { name: "Business service", description: "Links a catalog to the part of the business it serves." },
+      purpose: { name: "Purpose", description: "Says why personal data is processed." },
+      sensitivity: { name: "Sensitive data", description: "Marks tables only some people should see." },
+    } satisfies Record<TagKey, { name: string; description: string }>,
+    tagName: "Tag name",
+    tagValue: "Value that means yes",
+    found: "Also found in your workspace:",
+    tagUse: (count: number, on: string) => `on ${new Intl.NumberFormat("en-GB").format(count)} ${on}`,
+    notFound: "We did not find this tag in your workspace.",
+    policiesTitle: "Your own rules",
+    policiesBody: "Checks compare what they find with these numbers.",
+    policies: {
+      adminLimit: "Most admins allowed in a workspace",
+      historyDays: "Days of history to keep",
+      restoreTestMonths: "Months allowed between restore tests",
+      loadDeadline: "Daily risk data must be ready by",
+    } satisfies Record<keyof Policies, string>,
+    recsTitle: "Ways to make audits easier",
+    recsBody: "Small changes that make your evidence cleaner and your scans more reliable.",
+    recsEmptyTitle: "Nothing to suggest",
+    recsEmptyBody: "Your data map is tidy. Nice.",
+    recs: {
+      emptyRole: (role: string, checks: number) => ({
+        title: `Tell us where “${role}” lives`,
+        body: `Nothing is picked for it, so ${checks} ${plural(checks, "check", "checks")} cannot look in the right place.`,
+      }),
+      singleTables: (role: string, count: number) => ({
+        title: `Pick whole schemas for “${role}” where you can`,
+        body: `You picked ${count} single ${plural(count, "table", "tables")}. A whole schema also covers tables added later, so nothing is missed at the next audit.`,
+      }),
+      strayBoard: (table: string) => ({
+        title: "A board table sits outside your board data",
+        body: `${table} looks like a board report but is not in your board data. Add it, or move it next to the others.`,
+      }),
+      strayTest: (catalog: string) => ({
+        title: "This looks like test data",
+        body: `The catalog ${catalog} is not marked as test data, but its name suggests it is.`,
+      }),
+      duplicateTag: (chosen: string, other: string, count: number, on: string) => ({
+        title: `Use one tag, not two: ${chosen} and ${other}`,
+        body: `${count} ${on} use ${other} instead of ${chosen}. Checks only look for one name, so those would be missed. Ask your platform team to rename them.`,
+      }),
+      inheritOwner: {
+        title: "Set owners on schemas, not table by table",
+        body: "Tables can take their owner from the schema they sit in. That closes gaps like the 24 unowned tables in one go.",
+      },
+      add: "Add it",
+      added: "Added to your data map",
+    },
+    banner: {
+      title: "Check your data map",
+      body: "We made a first guess at how your data is organised. Two minutes now makes every check look in the right place.",
+      cta: "Check data map",
+    },
+    afterScan: "Check my data map",
+    logicNote: "This query is filled in from your data map (your tag names and where things live).",
+    logicLink: "Open data map",
   },
   marketing: {
     nav: { main: "Site", pricing: "Pricing", sample: "Sample report", faq: "FAQ", setup: "Setup guide", logIn: "Log in" },

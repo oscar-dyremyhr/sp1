@@ -35,7 +35,7 @@ SELECT c.catalog_name, t.tag_value AS business_service
 FROM system.information_schema.catalogs c
 LEFT JOIN system.information_schema.catalog_tags t
   ON t.catalog_name = c.catalog_name
- AND t.tag_name = 'business_service'
+ AND t.tag_name = '{{tag.businessService}}'
 WHERE c.catalog_name NOT IN ('system', 'samples')
 ORDER BY c.catalog_name`,
     ["catalog_name", "business_service"],
@@ -67,8 +67,8 @@ LEFT JOIN system.information_schema.table_tags o
   ON  o.catalog_name = c.catalog_name
   AND o.schema_name  = c.schema_name
   AND o.table_name   = c.table_name
-  AND o.tag_name     = 'owner'
-WHERE c.tag_name = 'criticality' AND c.tag_value = 'critical'
+  AND o.tag_name     = '{{tag.owner}}'
+WHERE c.tag_name = '{{tag.criticality}}' AND c.tag_value = '{{tag.criticality.value}}'
 GROUP BY c.catalog_name
 HAVING COUNT(*) > COUNT(o.tag_value)`,
     ["catalog_name", "critical_tables", "with_owner"],
@@ -83,7 +83,7 @@ JOIN system.information_schema.table_tags s
   ON  s.catalog_name = p.table_catalog
   AND s.schema_name  = p.table_schema
   AND s.table_name   = p.table_name
-  AND s.tag_name = 'sensitivity' AND s.tag_value = 'sensitive'
+  AND s.tag_name = '{{tag.sensitivity}}' AND s.tag_value = '{{tag.sensitivity.value}}'
 WHERE p.grantee LIKE '%@%'        -- a person, not a group
 GROUP BY p.grantee`,
     ["grantee", "direct_grants"],
@@ -426,7 +426,7 @@ GROUP BY 1`,
 SELECT target_table_full_name,
        array_sort(collect_set(entity_type)) AS written_by
 FROM system.access.table_lineage
-WHERE target_table_full_name LIKE 'risk.board.%'
+WHERE {{scope:board:target_table_full_name}}
   AND event_date >= current_date() - INTERVAL 90 DAYS
 GROUP BY 1`,
     ["target_table_full_name", "written_by"],
@@ -445,7 +445,7 @@ GROUP BY 1`,
 SELECT COUNT(*) AS pii_columns,
        COUNT(DISTINCT concat_ws('.', catalog_name, schema_name, table_name)) AS tables
 FROM system.information_schema.column_tags
-WHERE tag_name = 'pii'`,
+WHERE tag_name = '{{tag.pii}}'`,
     ["pii_columns", "tables"],
     [["1204", "187"]],
     "1,204 columns are tagged as personal data, across 187 tables.",
@@ -455,10 +455,10 @@ WHERE tag_name = 'pii'`,
 SELECT COUNT(*) AS pii_tables,
        COUNT(p.tag_value) AS with_purpose
 FROM (SELECT DISTINCT catalog_name, schema_name, table_name
-      FROM system.information_schema.column_tags WHERE tag_name = 'pii') t
+      FROM system.information_schema.column_tags WHERE tag_name = '{{tag.pii}}') t
 LEFT JOIN system.information_schema.table_tags p
   USING (catalog_name, schema_name, table_name)
-WHERE p.tag_name = 'processing_purpose' OR p.tag_name IS NULL`,
+WHERE p.tag_name = '{{tag.purpose}}' OR p.tag_name IS NULL`,
     ["pii_tables", "with_purpose"],
     [["187", "187"]],
     "Every one of the 187 tables with personal data states why the data is processed.",
@@ -467,10 +467,10 @@ WHERE p.tag_name = 'processing_purpose' OR p.tag_name IS NULL`,
     `
 SELECT t.catalog_name, t.schema_name, t.table_name
 FROM (SELECT DISTINCT catalog_name, schema_name, table_name
-      FROM system.information_schema.column_tags WHERE tag_name = 'pii') t
+      FROM system.information_schema.column_tags WHERE tag_name = '{{tag.pii}}') t
 LEFT ANTI JOIN system.information_schema.table_tags r
   ON  r.catalog_name = t.catalog_name AND r.schema_name = t.schema_name
-  AND r.table_name   = t.table_name   AND r.tag_name    = 'retention_days'`,
+  AND r.table_name   = t.table_name   AND r.tag_name    = '{{tag.retention}}'`,
     ["catalog_name", "schema_name", "table_name"],
     [
       ["customers", "legacy", "dim_customer_2014_import"],
@@ -504,7 +504,7 @@ FROM system.information_schema.column_tags t
 LEFT ANTI JOIN system.information_schema.column_masks m
   ON  m.table_catalog = t.catalog_name AND m.table_schema = t.schema_name
   AND m.table_name    = t.table_name   AND m.column_name  = t.column_name
-WHERE t.tag_name = 'pii'`,
+WHERE t.tag_name = '{{tag.pii}}'`,
     ["catalog_name", "schema_name", "table_name", "column_name"],
     [],
     "No rows: all 1,204 columns tagged as personal data have a mask.",
@@ -568,8 +568,8 @@ GROUP BY catalog_name`,
     `
 SELECT target_table_full_name, entity_type, entity_id
 FROM system.access.table_lineage
-WHERE target_table_full_name LIKE 'sandbox.%'
-  AND source_table_full_name LIKE 'customers.%'
+WHERE {{scope:test:target_table_full_name}}
+  AND {{scope:personal:source_table_full_name}}
   AND NOT (entity_type = 'JOB' AND entity_id = :masking_job_id)
   AND event_date >= current_date() - INTERVAL 90 DAYS`,
     ["target_table_full_name", "entity_type", "entity_id"],

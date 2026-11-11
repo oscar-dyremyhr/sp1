@@ -61,6 +61,8 @@ export type EvidenceMethod = {
   /** Plain sentence: how the rows become the finding. */
   reading: string;
   note?: string;
+  /** True when the query was filled in from the organisation's data map. */
+  usesMap?: boolean;
 };
 
 /** The rule that turns a control's evidence into one of the three statuses. */
@@ -106,3 +108,36 @@ export type Invoice = {
 };
 
 export type ControlFilter = { regulationId?: RegulationId | "all"; status?: ControlStatus | "all" };
+
+// ---------- Data map: how this organisation organises and tags its data ----------
+
+export type WorkspaceStructure = { name: string; workspace: string; schemas: { name: string; tables: string[] }[] }[];
+
+export type DiscoveredTag = { name: string; on: "catalogs" | "tables" | "columns"; count: number; values?: string[] };
+
+/** A kind of data that checks need to find. */
+export type DataRole = "risk" | "board" | "personal" | "test";
+
+/** A meaning that the organisation expresses with a tag. */
+export type TagKey = "pii" | "criticality" | "owner" | "retention" | "businessService" | "purpose" | "sensitivity";
+
+export type TagSetting = { name: string; value?: string };
+
+export type Policies = { adminLimit: number; historyDays: number; restoreTestMonths: number; loadDeadline: string };
+
+export type DataMap = {
+  /** Paths: "catalog", "catalog.schema" or "catalog.schema.table". A catalog or schema covers everything inside it, now and later. */
+  roles: Record<DataRole, string[]>;
+  tags: Record<TagKey, TagSetting>;
+  policies: Policies;
+  /** null until someone has checked the first guess and saved it. */
+  confirmedAt: string | null;
+};
+
+export type MapRecommendation = {
+  id: string;
+  title: string;
+  body: string;
+  /** One-click fix: add this path to this role, or use this tag name. */
+  action?: { label: string; role?: DataRole; path?: string; tag?: TagKey; tagName?: string };
+};
