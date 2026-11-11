@@ -1,10 +1,29 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { Dialog } from "radix-ui";
 import { X } from "lucide-react";
 import { copy } from "@/content/copy";
 import { cn } from "@/lib/utils";
+
+/**
+ * These dialogs are opened from code, not from a Radix trigger, so we remember
+ * what had focus and hand it back on close. Keyboard users land where they were.
+ */
+function useReturnFocus() {
+  const previous = useRef<HTMLElement | null>(null);
+  return {
+    onOpenAutoFocus: () => {
+      previous.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    },
+    onCloseAutoFocus: (event: Event) => {
+      if (previous.current?.isConnected) {
+        event.preventDefault();
+        previous.current.focus();
+      }
+    },
+  };
+}
 
 const overlay =
   "no-print fixed inset-0 z-50 bg-overlay data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0";
@@ -26,11 +45,13 @@ export function Modal({
   size?: "md" | "lg";
   hideClose?: boolean;
 }) {
+  const returnFocus = useReturnFocus();
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className={overlay} />
         <Dialog.Content
+          {...returnFocus}
           className={cn(
             "no-print fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-card bg-surface p-6 shadow-pop sm:p-8",
             "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
@@ -78,11 +99,13 @@ export function Drawer({
   children: ReactNode;
   footer?: ReactNode;
 }) {
+  const returnFocus = useReturnFocus();
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className={overlay} />
         <Dialog.Content
+          {...returnFocus}
           className={cn(
             "no-print fixed inset-y-0 right-0 z-50 flex w-full max-w-xl flex-col bg-paper shadow-pop",
             "data-[state=open]:animate-in data-[state=open]:slide-in-from-right data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=closed]:duration-200 data-[state=open]:duration-300",

@@ -1,85 +1,121 @@
-# sp1
+# Receipts
 
-> **Side project 1** — working title. The repo will be renamed once the project has a proper name.
+> *Show the auditor your receipts.*
+>
+> Repo working name: **sp1** (side project 1). It will be renamed later.
 
-A website built with **Next.js**, **TypeScript**, **Tailwind CSS** and **shadcn/ui**, hosted on **Vercel**.
+**Receipts** turns a Databricks lakehouse into an auditor-ready evidence report for DORA, BCBS 239 and GDPR, so nobody has to rebuild compliance evidence by hand in spreadsheets.
+
+This repository is the **front-end MVP**: a fully clickable product with **mocked data and no backend**, used to demo to design partners and test pricing. A visitor can land, start a trial, "connect" a workspace, generate an audit report, download it as a PDF, and meet the paywall when asking for a second one.
+
+Everything shown is sample content for a fictional bank, **Nordlys Bank**. The control mappings are illustrative, not legal advice.
+
+## Try it
+
+```bash
+npm install
+npm run dev
+```
+
+Open http://localhost:3000. Any email logs you in. The checkout only accepts the test card `4242 4242 4242 4242`. **Settings → Reset demo** returns you to a fresh trial.
+
+## The journey
+
+| Route | What it is |
+| --- | --- |
+| `/` | Landing page |
+| `/pricing`, `/faq`, `/sample-report` | Pricing with monthly/annual toggle, FAQ, public read-only sample report |
+| `/signup`, `/login` | Mocked auth (any email works) |
+| `/app/welcome` | Onboarding wizard: company, regulations, connect workspace, first scan |
+| `/app` | Dashboard: readiness score, status counts, top 3 things to fix, credits |
+| `/app/controls` | Controls explorer with detail drawer, evidence and fix steps |
+| `/app/reports/new` | Report wizard, then the receipt-printing animation |
+| `/app/reports/:id` | Report viewer: Download PDF, copy share link, free 24-hour refresh |
+| `/app/reports` | Report history: open, duplicate, compare |
+| `/app/billing` | Plan, credits, usage, buy credits, upgrade, invoices |
+| `/app/settings` | Team invites, workspace connections, Reset demo |
+| `/share/:token` | Read-only shared report |
+| `/styleguide` | Every design-system component |
 
 ## Tech stack
 
-| Tool | Purpose |
+| Concern | Choice |
 | --- | --- |
-| [Next.js](https://nextjs.org/docs) (App Router) | React framework: routing, server components, builds |
-| [TypeScript](https://www.typescriptlang.org/) | Type safety |
-| [Tailwind CSS v4](https://tailwindcss.com/docs) | Utility-first styling (configured in `src/app/globals.css`) |
-| [shadcn/ui](https://ui.shadcn.com/docs) | Accessible components copied into `src/components/ui` |
-| [ESLint](https://eslint.org/) | Linting (`eslint-config-next`) |
-| [Vercel](https://vercel.com/docs) | Hosting & preview deployments |
+| Framework | [Next.js](https://nextjs.org) App Router + React 19 + TypeScript, hosted on Vercel |
+| Styling | Tailwind CSS v4 mapped to design tokens as CSS variables; light and dark themes |
+| Primitives | Radix UI (dialog, tooltip, accordion, dropdown), restyled; shadcn/ui is configured and themed |
+| Motion | Motion (Framer Motion) |
+| Charts | Recharts |
+| State | Zustand, persisted to local storage |
+| PDF | Print stylesheet + `window.print()` |
+| Tests | Vitest (logic), Playwright + axe (journey, accessibility) |
 
 ## Project structure
 
 ```
-sp1/
-├── public/                 # Static files served from /
-├── src/
-│   ├── app/                # App Router: routes, layouts, globals.css
-│   │   ├── layout.tsx      # Root layout (fonts, metadata)
-│   │   └── page.tsx        # Home page (/)
-│   ├── components/
-│   │   └── ui/             # shadcn/ui components (yours to edit)
-│   └── lib/
-│       └── utils.ts        # cn() class-name helper
-├── components.json         # shadcn/ui config
-├── next.config.ts
-└── .github/workflows/      # CI: lint, type-check, build
+src/
+├── app/                 # Next.js routes only (thin files that render a screen)
+├── design-system/
+│   ├── tokens.css       # THE only place colours are defined (light, dark, print)
+│   └── components/      # Button, StatusPill, ScoreGauge, EvidenceCard, Stamp, Stepper,
+│                        # Drawer, Modal, DataTable, PlanCard, CreditCounter, EmptyState,
+│                        # Stubby, Toast, Term (glossary tooltip) …
+├── screens/
+│   ├── marketing/       # Landing, Pricing, Faq, Auth, site header/footer
+│   ├── app/             # Shell, Welcome, Dashboard, Controls, ReportWizard, Reports,
+│   │                    # Billing, Settings, Paywall + checkout
+│   └── report/          # The report document, viewer and printing animation
+├── mocks/
+│   ├── fixtures/        # Typed Nordlys Bank data: 24 controls, evidence, workspaces
+│   ├── service.ts       # The ONLY file the UI imports for data (async, with delays)
+│   └── types.ts
+├── content/
+│   ├── copy.ts          # Every user-facing string (ready for Norwegian and Danish)
+│   ├── glossary.ts      # Plain-language definitions for technical words
+│   └── pricing.ts       # Every price and plan
+├── store/               # session, credits, reports (local storage)
+├── lib/                 # scoring, report snapshots, formatting, hooks
+└── test/                # Vitest unit tests
+e2e/                     # Playwright: full journey + accessibility
 ```
 
-## Getting started
+### Rules worth keeping
 
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) 20.9+ (22 recommended — see `.nvmrc`)
-- npm 10+
-
-### Install & run
-
-```bash
-npm install
-npm run dev         # http://localhost:3000
-```
+- **Data** only flows through `src/mocks/service.ts`. Swap that file for a real API later and the UI does not change.
+- **Colours** only come from `src/design-system/tokens.css`. No hex values in components. (One exception: `src/app/icon.svg`, a static file that cannot read CSS variables.)
+- **Words** only come from `src/content/copy.ts`, written for a 12-year-old reading level. The report document itself is formal.
+- **Prices** only come from `src/content/pricing.ts`.
+- **Statuses** are exactly three, always with an icon and a word: *Looks good*, *Keep an eye on it*, *Needs fixing*.
+- **One primary button** per app screen, top right, always worded *Generate audit report*.
 
 ## Scripts
 
 | Script | Description |
 | --- | --- |
 | `npm run dev` | Start the dev server |
-| `npm run build` | Production build |
-| `npm run start` | Serve the production build |
-| `npm run lint` | Lint with ESLint |
-| `npm run type-check` | Type-check with `tsc` |
+| `npm run build` / `npm run start` | Production build / serve it |
+| `npm run lint` | ESLint |
+| `npm run type-check` | Generate route types, then `tsc` |
+| `npm test` | Vitest unit tests (scoring, pricing, credits, snapshots, service) |
+| `npm run test:e2e` | Playwright: builds the app, then runs the journey and accessibility tests |
 
-## Adding shadcn/ui components
+For the end-to-end tests on a new machine, install the browser once:
 
 ```bash
-npx shadcn@latest add dialog input dropdown-menu
+npx playwright install chromium
 ```
 
-Components land in `src/components/ui/` and can be edited freely. Browse them at [ui.shadcn.com/docs/components](https://ui.shadcn.com/docs/components).
+## Demo data
 
-> Tip: to style a link like a button, use `cn(buttonVariants({ variant: "outline" }))` so conflicting Tailwind classes are merged correctly.
+Nordlys Bank has 2 workspaces, 14 catalogs and 24 controls (DORA 10, BCBS 239 8, GDPR 6), seeded to a readiness score of 72: 15 look good, 6 to keep an eye on, 3 need fixing. *Settings → Scan again* pretends the platform team fixed one more thing each time, which makes report comparison interesting. Old reports are frozen snapshots and never change.
 
 ## Deploying to Vercel
 
-1. Go to [vercel.com/new](https://vercel.com/new) and import `oscar-dyremyhr/sp1`.
-2. Keep the detected defaults (framework: Next.js) and click **Deploy**.
+Import the repo at [vercel.com/new](https://vercel.com/new) and keep the detected Next.js defaults. Every push to `main` deploys.
 
-Every push to `main` deploys to production, and every pull request gets a preview URL. Renaming the GitHub repo later is fine — Vercel follows the rename.
+## Not in this MVP
 
-## Roadmap
-
-- [ ] Decide on a project name and rename the repo
-- [ ] Connect the repo to Vercel
-- [ ] Add a dark-mode toggle (e.g. `next-themes`)
-- [ ] Replace the starter page with real content
+No backend, real auth, real payments or real Databricks calls. No real regulatory mappings. English only. In this demo a share link opens in the browser that made the report, because reports live in local storage.
 
 ## License
 

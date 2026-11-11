@@ -49,10 +49,13 @@ export function Welcome() {
   const [scan, setScan] = useState<{ checked: number; total: number } | null>(null);
   const [score, setScore] = useState<number | null>(null);
 
-  // Onboarding already finished (for example after a reload): go to the dashboard.
+  // Onboarding was already finished when this page opened (for example after a
+  // reload): go to the dashboard. Finishing the scan here must not redirect,
+  // so the "Scan finished" step can be seen.
+  const [alreadyOnboarded] = useState(() => useSession.getState().onboarded);
   useEffect(() => {
-    if (session.onboarded && score === null) router.replace("/app");
-  }, [session.onboarded, score, router]);
+    if (alreadyOnboarded) router.replace("/app");
+  }, [alreadyOnboarded, router]);
 
   const run = async (work: () => Promise<void>) => {
     setBusy(true);

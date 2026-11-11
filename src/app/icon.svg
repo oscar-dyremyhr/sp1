@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Static asset: cannot read CSS variables, so the brand colour is repeated here (the one exception to tokens-only). -->
+  <rect width="32" height="32" rx="9" fill="#3d5afe"/>
+  <path d="M10 7h12v18l-3-2.5-3 2.5-3-2.5-3 2.5z" fill="#fff"/>
+  <path d="M13 12h6M13 16h4" stroke="#3d5afe" stroke-width="2" stroke-linecap="round"/>
+</svg>

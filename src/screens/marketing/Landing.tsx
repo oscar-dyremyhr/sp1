@@ -204,7 +204,7 @@ export function Landing() {
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-8 rounded-card bg-brand px-8 py-12 text-brand-ink md:px-14">
           <div className="max-w-xl">
             <h2 className="text-3xl font-extrabold md:text-4xl">{t.finalCta.title}</h2>
-            <p className="mt-2 text-lg opacity-90">{t.finalCta.body}</p>
+            <p className="mt-2 text-lg">{t.finalCta.body}</p>
             <ButtonLink href="/signup" size="lg" className="mt-6 bg-surface text-ink">
               {copy.common.startTrial}
               <ArrowRight aria-hidden />
