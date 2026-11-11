@@ -1,0 +1,21 @@
+{
+  "name": "sp1",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Side project 1 — a TypeScript website built with React and Vue.",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:react": "npm run dev -w @sp1/react",
+    "dev:vue": "npm run dev -w @sp1/vue",
+    "build": "npm run build --workspaces --if-present",
+    "build:react": "npm run build -w @sp1/react",
+    "build:vue": "npm run build -w @sp1/vue",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}
