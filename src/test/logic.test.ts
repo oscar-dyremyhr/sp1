@@ -36,6 +36,31 @@ describe("Nordlys Bank fixtures", () => {
   });
 });
 
+describe("how we got each answer", () => {
+  it("gives every control a rule and a result", () => {
+    for (const c of controls) {
+      expect(c.logic?.rule, c.id).toBeTruthy();
+      expect(c.logic?.result, c.id).toBeTruthy();
+    }
+  });
+
+  it("gives every piece of evidence a query, columns and a reading", () => {
+    for (const e of evidence) {
+      expect(e.method, e.id).toBeDefined();
+      expect(e.method.query.length, e.id).toBeGreaterThan(20);
+      expect(e.method.reading, e.id).toBeTruthy();
+      for (const row of e.method.rows) expect(row.length, e.id).toBe(e.method.columns.length);
+    }
+  });
+
+  it("uses real audit-log columns for the admin login check", () => {
+    const q = evidence.find((e) => e.id === "ev-dora-a9-02-2")!.method.query;
+    for (const part of ["system.access.audit", "service_name = 'accounts'", "action_name", "request_params.user", "event_date"]) {
+      expect(q).toContain(part);
+    }
+  });
+});
+
 describe("scoring", () => {
   it("bands scores into three words", () => {
     expect(scoreBand(80)).toBe("pass");

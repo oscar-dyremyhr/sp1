@@ -486,6 +486,30 @@ export const copy = {
       doneBody: "Welcome back to day one.",
     },
   },
+  logic: {
+    button: "Show how we got this answer",
+    title: "How we got this answer",
+    intro: "This part is for your engineer or your auditor. It shows each read-only check we ran, what came back, and the rule we applied.",
+    connection:
+      "Receipts signs in to your workspace as a read-only service principal. It reads logs and settings about your data, never the data itself.",
+    ruleTitle: "The rule",
+    resultTitle: "The result",
+    checksTitle: "The checks we ran",
+    check: (n: number, total: number) => `Check ${n} of ${total}`,
+    via: { sql: "SQL query", rest: "Databricks API call", git: "Code host API call" },
+    viaHelp: {
+      sql: "Runs on a SQL warehouse in your workspace, sent through the Statement Execution API.",
+      rest: "A read-only call to your workspace’s REST API.",
+      git: "A read-only call to the place your code is kept.",
+    },
+    cameBack: "What came back",
+    noRows: "No rows came back.",
+    moreRows: (n: number) => `…and ${n} more ${plural(n, "row", "rows")}`,
+    weRead: "How we read it",
+    goodToKnow: "Good to know",
+    copyQuery: "Copy",
+    copied: "Query copied",
+  },
   marketing: {
     nav: { main: "Site", pricing: "Pricing", sample: "Sample report", faq: "FAQ", logIn: "Log in" },
     footer: {

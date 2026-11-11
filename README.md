@@ -109,6 +109,24 @@ npx playwright install chromium
 
 Nordlys Bank has 2 workspaces, 14 catalogs and 24 controls (DORA 10, BCBS 239 8, GDPR 6), seeded to a readiness score of 72: 15 look good, 6 to keep an eye on, 3 need fixing. *Settings → Scan again* pretends the platform team fixed one more thing each time, which makes report comparison interesting. Old reports are frozen snapshots and never change.
 
+## How the checks would work for real
+
+Every control has a **Show how we got this answer** button. It shows the rule, each read-only check, a sample of the rows that came back, and how they were read. In this MVP those are fixtures in `src/mocks/fixtures/methods.ts`. In the real product a small backend would run them, in three ways:
+
+| Source | How | Used for |
+| --- | --- | --- |
+| **System tables** (`system.access.audit`, `system.access.table_lineage`, `system.information_schema.*`, `system.lakeflow.*`) | SQL on a serverless SQL warehouse, sent with the [Statement Execution API](https://docs.databricks.com/api/workspace/statementexecution) (`POST /api/2.0/sql/statements`) or the `@databricks/sql` Node.js driver | Most checks: logins, permission changes, lineage, tags, masks, job runs |
+| **Workspace REST APIs** (SCIM groups, Jobs, Unity Catalog tables, SQL alerts) | Plain HTTPS calls | Current state that system tables do not hold, such as who is an admin right now, or a table's history setting |
+| **Code host API** (for example GitHub) | Plain HTTPS calls | Pull-request approvals, branch protection, policy and runbook history |
+
+Notes for whoever builds it:
+
+- Sign in as a **service principal with OAuth (machine to machine)** that has only `USE CATALOG` / `USE SCHEMA` / `SELECT` on the `system` catalog, plus read-only API scopes. That is what makes "read-only" true.
+- Queries run on a schedule (the "scan"), not when a page opens. Results are stored as evidence with the query text, a row sample and a timestamp, so a report is a frozen snapshot.
+- Checks read **logs, settings and check results**, never business rows. Where a control needs a fact about the data (for example the oldest record), it reads the result of a data-quality check instead.
+- Audit logs are regional, and account-level events use `workspace_id = 0`. Filter on `event_date` for speed. Statement text (`commandSubmit`) is only logged when **verbose audit logs** are on.
+- Tag names (`owner`, `pii`, `retention_days`…) and thresholds are customer-specific, so they belong in per-customer settings.
+
 ## Deploying to Vercel
 
 Import the repo at [vercel.com/new](https://vercel.com/new) and keep the detected Next.js defaults. Every push to `main` deploys.

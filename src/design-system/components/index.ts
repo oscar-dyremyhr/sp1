@@ -1,6 +1,7 @@
 export * from "./Accordion";
 export * from "./Basics";
 export * from "./Button";
+export * from "./CodeBlock";
 export * from "./Confetti";
 export * from "./CreditCounter";
 export * from "./DataTable";

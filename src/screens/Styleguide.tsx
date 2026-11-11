@@ -8,6 +8,7 @@ import {
   Button,
   Card,
   ChoiceCard,
+  CodeBlock,
   Confetti,
   CreditCounter,
   DataTable,
@@ -307,6 +308,15 @@ export function Styleguide() {
           </Button>
           {confetti > 0 ? <Confetti key={confetti} /> : null}
         </div>
+      </Section>
+
+      <Section title="Code block">
+        <CodeBlock
+          label="system.access.audit"
+          copyLabel="Copy"
+          copiedMessage="Query copied"
+          code={"SELECT request_params.user AS admin, MAX(event_date) AS last_login\nFROM system.access.audit\nWHERE service_name = 'accounts' AND action_name = 'login'\nGROUP BY 1"}
+        />
       </Section>
 
       <Section title="Form controls and glossary">

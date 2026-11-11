@@ -1,7 +1,8 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChevronRight, Copy } from "lucide-react";
+import { useState } from "react";
+import { ChevronRight, Copy, SearchCode } from "lucide-react";
 import {
   Badge,
   Button,
@@ -21,6 +22,7 @@ import { copy } from "@/content/copy";
 import { useQuery } from "@/lib/use-query";
 import { getControl, listControls, listRegulations } from "@/mocks/service";
 import type { ControlStatus, RegulationId } from "@/mocks/types";
+import { ControlLogic } from "./ControlLogic";
 import { ErrorState } from "./ErrorState";
 
 const t = copy.controls;
@@ -152,6 +154,7 @@ function ControlDrawer({ id, onClose }: { id: string | null; onClose: () => void
   const d = copy.controls.drawer;
   const { data, error } = useQuery(`control:${id ?? "none"}`, () => (id ? getControl(id) : Promise.resolve(null)));
   const control = data?.control;
+  const [showLogic, setShowLogic] = useState(false);
 
   const copyMessage = async () => {
     if (!control) return;
@@ -200,6 +203,17 @@ function ControlDrawer({ id, onClose }: { id: string | null; onClose: () => void
             <p className="mt-2 text-sm text-ink-muted">
               <GlossaryText text={control.formalTitle} />
             </p>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="mt-4"
+              icon={<SearchCode aria-hidden />}
+              onClick={() => setShowLogic(true)}
+              data-testid="show-logic"
+            >
+              {copy.logic.button}
+            </Button>
+            <ControlLogic control={control} evidence={data.evidence} open={showLogic} onOpenChange={setShowLogic} />
           </section>
 
           <section>

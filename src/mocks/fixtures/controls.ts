@@ -1,4 +1,5 @@
 import type { Control, ControlStatus, Evidence, EvidenceType, RegulationId } from "../types";
+import { logic, methods } from "./methods";
 
 /**
  * 24 illustrative controls for the fictional Nordlys Bank:
@@ -71,7 +72,7 @@ const seeds: Seed[] = [
     status: "fix",
     why: "11 people have admin rights on the production workspace. Your own policy allows 4.",
     ev: [
-      ["access_grant", "system.access.audit", "11 accounts hold the workspace admin role on nordlys-prod.", "The access policy (v3.2) sets the limit at 4."],
+      ["access_grant", "Identity API: /scim/v2/Groups", "11 accounts hold the workspace admin role on nordlys-prod.", "The access policy (v3.2) sets the limit at 4."],
       ["change_record", "system.access.audit", "3 admin accounts have not logged in for over 90 days."],
     ],
     fix: [
@@ -90,7 +91,7 @@ const seeds: Seed[] = [
     why: "All 312 changes to production pipelines in the last 90 days went through a pull request with an approval.",
     ev: [
       ["change_record", "git: nordlys/lakehouse-pipelines", "312 of 312 merged pull requests had at least one approval.", "Branch protection is on for main."],
-      ["change_record", "system.lakeflow.job_run_timeline", "No production job ran from an unreviewed branch."],
+      ["change_record", "Jobs API: /api/2.2/jobs/list", "No production job ran from an unreviewed branch."],
     ],
   },
   {
@@ -114,7 +115,7 @@ const seeds: Seed[] = [
     status: "watch",
     why: "9 of 14 catalogs keep 30 days of time travel. 5 catalogs keep only 7 days, which is below your policy.",
     ev: [
-      ["retention_policy", "system.information_schema.tables", "9 of 14 catalogs keep 30 days of history.", "analytics, sandbox, treasury_sandbox, reporting and ml_features keep 7 days."],
+      ["retention_policy", "Unity Catalog API: /unity-catalog/tables", "9 of 14 catalogs keep 30 days of history.", "analytics, sandbox, treasury_sandbox, reporting and ml_features keep 7 days."],
     ],
     fix: ["Raise the history setting to 30 days on the 5 catalogs", "Re-scan to confirm"],
   },
@@ -152,7 +153,7 @@ const seeds: Seed[] = [
     status: "pass",
     why: "Data is shared with 3 outside companies. All 3 are on your supplier list and can only read what they need.",
     ev: [
-      ["access_grant", "system.information_schema.share_recipients", "3 external recipients, each matched to a supplier record.", "All shares are read-only."],
+      ["access_grant", "system.information_schema.recipients", "3 external recipients, each matched to a supplier record.", "All shares are read-only."],
       ["ownership_tag", "system.information_schema.external_locations", "6 storage locations, all inside EU regions."],
     ],
   },
@@ -180,7 +181,7 @@ const seeds: Seed[] = [
     status: "pass",
     why: "All risk tables live in the risk catalog and follow the naming rules. Nothing important sits in personal folders.",
     ev: [
-      ["lineage", "system.access.table_lineage", "41 of 41 regulatory risk tables are in the risk catalog."],
+      ["ownership_tag", "system.information_schema.table_tags", "41 of 41 regulatory risk tables are in the risk catalog."],
       ["dq_check", "system.information_schema.tables", "100% of risk tables follow the naming standard."],
     ],
   },
@@ -194,8 +195,8 @@ const seeds: Seed[] = [
     why: "38 of 41 risk tables have full lineage back to source. 3 tables were built by hand-run notebooks.",
     ev: [
       ["lineage", "system.access.table_lineage", "38 of 41 risk tables trace back to their source systems."],
-      ["lineage", "system.access.column_lineage", "3 tables have no upstream link: they are filled by notebooks run by hand."],
-      ["change_record", "system.lakeflow.job_run_timeline", "No scheduled job writes to the 3 tables."],
+      ["lineage", "system.access.table_lineage", "3 tables have no upstream link: they are filled by notebooks run by hand."],
+      ["change_record", "system.access.table_lineage", "No scheduled job writes to the 3 tables."],
     ],
     fix: ["Move the 3 notebooks into a scheduled job", "Re-scan to capture lineage"],
   },
@@ -245,7 +246,7 @@ const seeds: Seed[] = [
     status: "pass",
     why: "Risk data can be cut by entity, country, product and counterparty without new engineering work.",
     ev: [
-      ["lineage", "system.access.column_lineage", "All 4 reporting dimensions are present on the group exposure table."],
+      ["lineage", "system.information_schema.columns", "All 4 reporting dimensions are present on the group exposure table."],
     ],
   },
   {
@@ -349,7 +350,7 @@ const seeds: Seed[] = [
     status: "pass",
     why: "Alerts watch for unusual reads and exports of personal data, and the last test alert reached the team in 6 minutes.",
     ev: [
-      ["change_record", "system.access.audit", "Export and bulk-read alerts are active on all pii tables.", "Last alert test: delivered in 6 minutes."],
+      ["change_record", "SQL Alerts API: /api/2.0/sql/alerts", "Export and bulk-read alerts are active on all pii tables.", "Last alert test: delivered in 6 minutes."],
     ],
   },
 ];
@@ -358,7 +359,7 @@ const evidenceList: Evidence[] = [];
 const controlList: Control[] = seeds.map((s) => {
   const evidenceIds = s.ev.map(([type, source, summary, details], i) => {
     const id = `ev-${s.id}-${i + 1}`;
-    evidenceList.push({ id, type, source, summary, details: details ?? "", capturedAt: CAPTURED });
+    evidenceList.push({ id, type, source, summary, details: details ?? "", capturedAt: CAPTURED, method: methods[id] });
     return id;
   });
   return {
@@ -372,6 +373,7 @@ const controlList: Control[] = seeds.map((s) => {
     evidenceIds,
     fixSteps: s.fix ?? [],
     owner: s.owner ?? PLATFORM,
+    logic: logic[s.id],
   };
 });
 

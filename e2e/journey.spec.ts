@@ -63,8 +63,17 @@ test("a first-time visitor gets from the landing page to a downloaded report, th
   const drawer = page.getByTestId("control-drawer");
   await expect(page.getByRole("heading", { name: "Can you show where your risk numbers come from?" })).toBeVisible();
   await expect(drawer.locator("[data-status=watch]")).toHaveText("Keep an eye on it");
-  await expect(drawer.getByText("system.access.table_lineage")).toBeVisible();
+  await expect(drawer.getByText("system.access.table_lineage").first()).toBeVisible();
   await expect(drawer.getByText("Ask your data platform team to:")).toBeVisible();
+  // "Show how we got this answer": the rule, each check's query and what came back
+  await page.getByTestId("show-logic").click();
+  const logic = page.getByTestId("control-logic");
+  await expect(logic.getByText("38 of 41 is 93%, so it sits in the middle band.")).toBeVisible();
+  await expect(logic.getByTestId("logic-check")).toHaveCount(3);
+  await expect(logic.getByText("FROM system.access.table_lineage").first()).toBeVisible();
+  await expect(logic.getByRole("cell", { name: "agg_manual_overrides", exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(logic).toBeHidden();
   await page.getByTestId("share-fix").click();
   await expect(page.getByTestId("toast").filter({ hasText: "Message copied" })).toBeVisible();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("Move the 3 notebooks into a scheduled job");

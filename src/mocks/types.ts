@@ -47,7 +47,24 @@ export type Control = {
   evidenceIds: string[];
   fixSteps: string[];
   owner: string;
+  logic: ControlLogic;
 };
+
+/** How one piece of evidence was collected: the read-only call and a sample of what came back. */
+export type EvidenceMethod = {
+  via: "sql" | "rest" | "git";
+  query: string;
+  columns: string[];
+  rows: string[][];
+  /** Rows that came back but are not shown in the sample. */
+  more?: number;
+  /** Plain sentence: how the rows become the finding. */
+  reading: string;
+  note?: string;
+};
+
+/** The rule that turns a control's evidence into one of the three statuses. */
+export type ControlLogic = { rule: string; result: string };
 
 export type Evidence = {
   id: string;
@@ -56,6 +73,7 @@ export type Evidence = {
   summary: string;
   capturedAt: string;
   details: string;
+  method: EvidenceMethod;
 };
 
 export type StatusCounts = Record<ControlStatus, number>;

@@ -68,7 +68,13 @@ function currentControls(): Control[] {
     .filter((c) => active.has(c.regulationId))
     .map((c) =>
       fixed.has(c.id)
-        ? { ...c, status: "pass" as const, explanation: copy.service.fixedExplanation, fixSteps: [] }
+        ? {
+            ...c,
+            status: "pass" as const,
+            explanation: copy.service.fixedExplanation,
+            fixSteps: [],
+            logic: { ...c.logic, result: copy.service.fixedExplanation },
+          }
         : c,
     );
 }
